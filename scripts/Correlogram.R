@@ -30,15 +30,12 @@ data(mite.env)
 #--location data
 data(mite.xy)
 
+#--if you are interested in what all of the data is then check out the help page
+#?mite
+
 #=========================================================================================
 # Spatial correlogram based on Moran's I
 #=========================================================================================
-
-#--normalize community data so that it can be used with euclidean distance
-mite.h <- decostand(mite,'hellinger')
-
-#--Center the spatial data
-mite.xy.c <- scale(mite.xy, center=T, scale=F)
 
 #-----------------------------------------------------------------------------------------
 # Search for neighbors of all points wihtin a radius of 0.7 m and multiples (i.e., 0 to 
@@ -55,10 +52,14 @@ summary(nb1)
 #-----------------------------------------------------------------------------------------
 # Correlograms of water density of substrate
 #-----------------------------------------------------------------------------------------
+#--isolate the column with water density data
 watr.dens <- mite.env[,2]
+#--make a spatial correlogram
 watr.correlog <- sp.correlogram(nb1, watr.dens, order = 14, method = 'I', zero.policy = T)
+#--print the p-values for each distance class
 print(watr.correlog, p.adjust.methods = 'holm')
+#--plot spatial pattern
 plot(watr.correlog)
 
-#--This graph shows how correlated pairs of observations are as you increase the distance
-# (or lag) between them
+#--This graph shows how correlated pairs of observations within each distance class are
+# as distance increases (or lag) between them
