@@ -1,3 +1,7 @@
+## Function downloaded from Joey Berhardt's Numerical Ecology repository on github
+## Feb. 16, 2017
+## https://github.com/JoeyBernhardt/NumericalEcology/blob/master/sr.value.R
+
 sr.value <- function (dfxy, z, xax = 1, yax = 2, method = c("bubble",
 	"greylevel"), zmax = NULL, csize = 1, cpoint = 0, pch = 20,
 	clegend = 0.75, neig = NULL, cneig = 1, xlim = NULL, ylim = NULL,

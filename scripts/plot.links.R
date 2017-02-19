@@ -1,3 +1,7 @@
+## Function downloaded from Joey Berhardt's Numerical Ecology repository on github
+## Feb. 16, 2017
+## https://github.com/JoeyBernhardt/NumericalEcology/blob/master/plot.links.R
+
 plot.links <- function(XY, D.mat=NULL, thresh=0.05, xlim=NULL, ylim=NULL)
 #
 # Plot a PCoA graph (map) from XY = a table of Cartesian coordinates. On the
