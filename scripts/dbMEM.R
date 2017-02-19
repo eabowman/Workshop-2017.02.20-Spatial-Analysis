@@ -59,6 +59,7 @@ xy.d1 <- dist(mite.xy)
 #--other distance larger than that, as the truncation distance.
 spanning <- spantree(xy.d1) #--finds a min. spanning tree connecting all pts.
 dmin <- max(spanning$dist)
+dmin
 
 #--Truncate te distance matrix
 xy.d1[xy.d1 > dmin] <- 4*dmin
