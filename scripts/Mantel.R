@@ -20,10 +20,8 @@ library(vegan)
 #<< Mite data >> -------------------------------------------------------------------------
 #--community data
 data(mite)
-
 #--environmental data
 data(mite.env)
-
 #--location data
 data(mite.xy)
 
@@ -31,7 +29,7 @@ data(mite.xy)
 #?mite
 
 #=========================================================================================
-# Mantel test
+# Mantel correlogram
 #=========================================================================================
 
 #-----------------------------------------------------------------------------------------
@@ -42,48 +40,68 @@ data(mite.xy)
 #--geographical distance matrix using Euclidean distance default
 mite.dist.spatial <- dist(mite.xy)
 
-#--community distance matrix using Morisitia's index
-mite.dist.comm <- vegdist(mite, method = 'morisita')
+#--detrend the species data by regresion on the site coordinates
+mite.hel <- decostand(mite, 'hellinger')
+#--test for linear trends; if signficiant, then we will need to detrend the data
+anova(rda(mite.h,mite.xy))
+
+#--to detrend, we will regress all variables against the x-y coordinates and retain
+#--the residuals
+#--computation of linearly detrended mite data
+mite.hel.resid <- resid(lm(as.matrix(mite.hel) ~ ., data = mite.xy))
+
+#--recalculate distance matrix using detrended data
+mite.hel.D <- dist(mite.hel.resid)
 
 #<< Run mantel test >> -------------------------------------------------------------------
 #--Null hypothesis: community similarity is indepent of geographical proximity
 #--Alternative hypothesis: communities closer geographically are more similar
-mite.spatial <- mantel(mite.dist.spatial, mite.dist.comm)
+mite.spatial <- mantel(mite.dist.spatial, mite.hel.D)
 mite.spatial
 
 #<< Mantel correlogram >> ----------------------------------------------------------------
 #--correlograms plot of community as a function of geographic distance classes
-mite.spatial.corr <- mantel.correlog(mite.dist.comm, mite.dist.comm)
+# if you want to specify break points use the argument break.pts and supply a vector with
+# the break pts you want the function to use
+# cutoff = T which is the default limts the correlogram to the distance classes that
+# include all pts
+mite.spatial.corr <- mantel.correlog(mite.dist.spatial, mite.hel.D, cutoff = F)
 plot(mite.spatial.corr)
 
 #--determine where the break points
 mite.spatial.corr$break.pts
 
+#--print the p-values for each distance class
+mite.spatial.corr$mantel.res
+
 #-----------------------------------------------------------------------------------------
 # Check for correlation between multiple environmental variables and community data
 #-----------------------------------------------------------------------------------------
 #<< Create distance matrices >> ----------------------------------------------------------
-#--community distance matrix
-mite.dist.comm <- vegdist(mite, method = 'morisita')
 
-#--Environmental distance matrix
-
+### Environmental distance matrix
 #--Substrate: a categorical variable
 unique(mite.env$Substrate)
 #--we need to change this over to numbers that represent each level
 within(mite.env, Substrate <- factor(Substrate, labels = c(1:7)))
 mite.env$Substrate <- as.numeric(mite.env$Substrate)
-
+#--make distance matrix
 mite.dist.env <- dist(mite.env[1:3])
 
-#<< Run mantel test of environment and community data >> ----------------------------------
-mite.env.comm <- mantel(mite.dist.env, mite.dist.comm)
+#<< Run mantel test of environment and community data >> ---------------------------------
+mite.env.comm <- mantel(mite.dist.env, mite.hel.D)
 mite.env.comm
 
 #<< Mantel correlogram >> ----------------------------------------------------------------
 #--correlograms plot community dissimilarityy as a function of environment
-mite.env.comm.corr <- mantel.correlog(mite.dist.env, mite.dist.comm)
+mite.env.comm.corr <- mantel.correlog(mite.dist.env, mite.hel.D, cutoff = F)
 plot(mite.env.comm.corr)
+
+#--determine where the break points
+mite.env.comm.corr$break.pts
+
+#--print the p-values for each distance class
+mite.env.comm.corr$mantel.res
 
 #-----------------------------------------------------------------------------------------
 # Check for correlation between single environmental variables and geographic distance
@@ -131,15 +149,8 @@ plot(mite.subs.corr)
 #-----------------------------------------------------------------------------------------
 # Check for correlation between water content of substrate and community
 #-----------------------------------------------------------------------------------------
-#<< Create distance matrices >> ----------------------------------------------------------
-#--ozone distance matrix
-mite.dist.comm <- vegdist(mite, method = 'morisita')
-
-#--Water content of the substrate (g/L): a continuous variable
-mite.dist.watrcont <- dist(mite.env$WatrCont)
-
 #<< Run mantel test >> -------------------------------------------------------------------
-mite.watr.comm <- mantel(mite.dist.watrcont, mite.dist.comm)
+mite.watr.comm <- mantel(mite.dist.watrcont, mite.hel.D)
 mite.watr.comm
 
 #--compare to community data and mult. environmental variables
@@ -147,8 +158,17 @@ mite.env.comm
 
 #<< Mantel correlogram >> ----------------------------------------------------------------
 #--correlograms plot of community as a function of geographic distance classes
-mite.watrcont.comm.corr <- mantel.correlog(mite.dist.watrcont, mite.dist.comm)
+mite.watrcont.comm.corr <- mantel.correlog(mite.dist.watrcont, mite.hel.D)
 plot(mite.watrcont.comm.corr)
+
+#--compare to community data and mult. environmental variables
+# Based on the similarity in r-values and correlograms, it seems that water content of
+# the substrate explains more of the variation in the community data than substrate
+# density or substrate
+plot(mite.env.comm.corr) 
 
 #--determine where the break points
 mite.watrcont.comm.corr$break.pts
+
+#--which points are significant
+mite.watrcont.comm.corr$mantel.res
