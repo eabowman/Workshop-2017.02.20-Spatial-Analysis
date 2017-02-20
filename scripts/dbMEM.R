@@ -1,6 +1,7 @@
 ## Script created by Liz Bowman, 2017-02-15 for use in a workshop on how to examine
 ## data for spatial paterns and to test for correlations between communities
 ## and environmental variables
+## eabowman@email.arizona.edu
 
 #=========================================================================================
 # Load packages and data
